@@ -43,12 +43,27 @@ main {
 
 main h1 {
   font-weight: 200;
-}
+} 
+
+
 
 .sample-img {
   width: 150px;
   height: 150px;
   object-fit: contain;  
+  animation-name: floating;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+  margin-left: 30px;
+  margin-top: 5px;
 }
+ 
+@keyframes floating {
+    0% { transform: translate(0,  0px); }
+    50%  { transform: translate(0, 15px); }
+    100%   { transform: translate(0, -0px); }   
+}
+
 
 
