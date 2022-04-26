@@ -4,7 +4,10 @@ import './App.css';
 import Header from './components/Header';
 import MainContent from './components/MainContent';
 import WaveSurfer from "wavesurfer.js";
-import TimelinePlugin from 'wavesurfer.js/src/plugin/timeline';
+import TimelinePlugin from 'wavesurfer.js/dist/plugin/wavesurfer.timeline.min.js';
+import RegionsPlugin from 'wavesurfer.js/dist/plugin/wavesurfer.regions.min.js';
+
+
 
 
 const App: React.FC = () => {
@@ -15,6 +18,9 @@ const App: React.FC = () => {
   var source = audioCtx.createBufferSource();
   var dest = audioCtx.createMediaStreamDestination();
   var mediaRecorder = new MediaRecorder(dest.stream);
+
+  const [wavesurferObj, setWaveSurferObj] = useState<WaveSurfer | null>();
+
 
   const [song, setSong] = useState<string | ArrayBuffer | null | undefined>(null)
   const [songUploaded, setSongUploaded] = useState<boolean>(false)
@@ -27,51 +33,47 @@ const App: React.FC = () => {
 }
 
 useEffect(() => {
-   var request = new XMLHttpRequest();
-   
-    request.open('GET', song as string, true);
-
-    request.responseType = 'arraybuffer';
-
-    request.onload = function() {
-      var audioData = request.response;
-  
-      audioCtx.decodeAudioData(audioData, function(buffer) {
-          source.buffer = buffer;
-
-          var wavesurfer = WaveSurfer.create({
+          setWaveSurferObj(WaveSurfer.create({
             container: '#waveform',
             waveColor: '#14213D',
             progressColor: '#FCA311',
-            cursorColor: "red",
-            cursorWidth: 4,
+            responsive: true,
             plugins : [
-              TimelinePlugin.create({
-                container: '#wave-timeline',
-            }),
+            RegionsPlugin.create({
+              dragSelection: {
+                slop: 3,
+                
+            }
+              
+            })
 
             ]
            
          
-        });
-        
-        wavesurfer.load(song as string);
+        }));
 
-        wavesurfer.on('ready', function () {
+        wavesurferObj?.regions.enableDragSelection({})
+
+      
+        
+        wavesurferObj?.init()
+        
+        wavesurferObj?.load(song as string);
+
+        wavesurferObj?.on('ready', () => {
          
       });
-  
-        },
-  
-        function(e){ console.log("Error with decoding audio data" + e); });
-  
-    }
 
-    request.send();
-  console.log(song)
-}, [song]);
+      wavesurferObj?.on('region-dblclick', () => {
 
-console.log(uploadSong)
+        wavesurferObj?.regions.clear()
+
+      });
+  
+   
+
+}, []);
+
 
 
 
