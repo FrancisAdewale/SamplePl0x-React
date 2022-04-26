@@ -3,6 +3,7 @@ import sampleImg from "../imgs/sample.png";
 
 interface IProps {
     updateSong : (arg: string | ArrayBuffer | null | undefined) => void
+  
 }
 
 const MainContent : React.FC<IProps> = ({updateSong}) => {
@@ -19,7 +20,7 @@ const MainContent : React.FC<IProps> = ({updateSong}) => {
   
                 const data = e.target!.result;
                 setChosenSongData(data);
-                updateSong(data)
+                updateSong(data);
 
                 };
                 

@@ -4,11 +4,12 @@ import './App.css';
 import Header from './components/Header';
 import MainContent from './components/MainContent';
 import WaveSurfer from "wavesurfer.js";
-
-
+import TimelinePlugin from 'wavesurfer.js/src/plugin/timeline';
 
 
 const App: React.FC = () => {
+
+  const [uploadSong, setUploadedSong] = useState(false)
 
   var audioCtx = new (window.AudioContext)();
   var source = audioCtx.createBufferSource();
@@ -16,22 +17,18 @@ const App: React.FC = () => {
   var mediaRecorder = new MediaRecorder(dest.stream);
 
   const [song, setSong] = useState<string | ArrayBuffer | null | undefined>(null)
-
-useEffect(() => {
-
-
-
-}, []);
+  const [songUploaded, setSongUploaded] = useState<boolean>(false)
 
   const updateSong = (newSong: string | ArrayBuffer | null | undefined):void => {
     setSong(newSong)
+    setUploadedSong(true)
+
 
 }
 
 useEffect(() => {
    var request = new XMLHttpRequest();
    
-
     request.open('GET', song as string, true);
 
     request.responseType = 'arraybuffer';
@@ -44,21 +41,26 @@ useEffect(() => {
 
           var wavesurfer = WaveSurfer.create({
             container: '#waveform',
-            waveColor: 'violet',
-            progressColor: 'purple'
+            waveColor: '#14213D',
+            progressColor: '#FCA311',
+            cursorColor: "red",
+            cursorWidth: 4,
+            plugins : [
+              TimelinePlugin.create({
+                container: '#wave-timeline',
+            }),
+
+            ]
+           
+         
         });
         
         wavesurfer.load(song as string);
 
         wavesurfer.on('ready', function () {
-          wavesurfer.play();
+         
       });
-        
-
   
-          source.connect(audioCtx.destination);
-          source.loop = true;
-          // source.start();
         },
   
         function(e){ console.log("Error with decoding audio data" + e); });
@@ -69,14 +71,37 @@ useEffect(() => {
   console.log(song)
 }, [song]);
 
+console.log(uploadSong)
+
 
 
   return (
     <div className='app-container'>
       <Header />
-      <MainContent updateSong={updateSong}/>
-      <div id='waveform'></div>
 
+      {
+      uploadSong
+
+      ?
+
+        <div id='waveform' style={{
+          width: "150vh",
+          height: "100vh",
+          margin: "200px auto 0 auto"
+        }}></div>
+      
+      :
+
+      <MainContent updateSong={updateSong}/> 
+
+      
+
+      }
+
+      <div id='wave-timeline' style={{
+          width: "150vh",
+          margin: "0 auto"
+        }}></div>
     </div>
   )
 }
