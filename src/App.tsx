@@ -3,13 +3,11 @@ import logo from './logo.svg';
 import './App.css';
 import Header from './components/Header';
 import MainContent from './components/MainContent';
+import AudioSample from './components/AudioSample';
 import WaveSurfer from "wavesurfer.js";
 import TimelinePlugin from 'wavesurfer.js/dist/plugin/wavesurfer.timeline.min.js';
 import RegionsPlugin from 'wavesurfer.js/dist/plugin/wavesurfer.regions.min.js';
 import { on } from 'stream';
-
-
-
 
 const App: React.FC = () => {
 
@@ -18,12 +16,13 @@ const App: React.FC = () => {
   const [wavesurferObj, setWaveSurferObj] = useState<WaveSurfer>();
   const [song, setSong] = useState<string | ArrayBuffer | null | undefined>(null);
   const [songUploaded, setSongUploaded] = useState<boolean>(false);
-  const [duration, setDuration] = useState(0); 
+  const [duration, setDuration] = useState<number>(0); 
+  const [zoom, setZoom] = useState<number>(1); 
+
 
   const updateSong = (newSong: string | ArrayBuffer | null | undefined):void => {
-    setSong(newSong)
-    setUploadedSong(true)
-
+    setSong(newSong);
+    setUploadedSong(true);
 }
 
 useEffect(() => {
@@ -48,27 +47,28 @@ useEffect(() => {
 
 useEffect(() => {
   wavesurferObj?.init();
+  wavesurferObj?.on('loading', (X) => {
+    console.log(X);
+
+  })
+
   wavesurferObj?.load(song as string);
-  wavesurferObj?.regions.enableDragSelection({})
-  wavesurferObj?.on('ready', () => {      
+  wavesurferObj?.regions.enableDragSelection({});
+  wavesurferObj?.on('ready', () => { 
+    setDuration(Math.floor(wavesurferObj?.getDuration()));
+    console.log(wavesurferObj?.getDuration());
   });
 
+
+  wavesurferObj?.getDuration()
+
   wavesurferObj?.on('region-dblclick', region => {
-   region.remove()
+   region.remove();
    
 });
 
-wavesurferObj?.on('region-created', region => {
-  const regions = region.wavesurfer.regions.list;
-  console.log(regions);
-
-
-})
 
 }, [wavesurferObj]);
-
-
-
 
   return (
     <div className='app-container'>
@@ -77,14 +77,15 @@ wavesurferObj?.on('region-created', region => {
       {
       uploadSong
       ?
-        <div ref={waveformRef} style={{
-          width: "150vh",
-          height: "100vh",
-          margin: "200px auto 0 auto"
-        }} ></div>
+      
+        <AudioSample waveformRef={waveformRef}/>
+        
       :
       <MainContent updateSong={updateSong}/> 
       }
+
+<div id="loading_flag">
+        </div>
     </div>
   )
 }
