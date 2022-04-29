@@ -15,18 +15,7 @@ interface IProps {
 
 const AudioSample : React.FC<IProps> = ({waveformRef, handleChange}) => {
 
-    const [value, setValue] = useState(0)
 
-    // const handleChange = (event: Event, newValue: number | number[]) => {
-    //     setValue(newValue as number);
-    //   };
-
-    //   const handleChangeCommit = (event: Event, newValue: number | number[]) => {
-    //       console.
-    //     // setValue(newValue as number);
-    //   };
-
-    
     return (
         
         <div ref={waveformRef} style={{

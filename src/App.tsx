@@ -70,15 +70,13 @@ useEffect(() => {
 
 }, [wavesurferObj]);
 
+useEffect(() => {
+   wavesurferObj?.zoom(zoom);
+}, [zoom, wavesurferObj]);
+
 const updateZoom = (e: React.MouseEvent<HTMLButtonElement>, newVal: number | number[]) => {
-
-
   console.log(newVal as number);
-
-  // setZoom(value)
-
-  
-
+  setZoom(newVal as number);
 
 }
 
@@ -96,8 +94,6 @@ const updateZoom = (e: React.MouseEvent<HTMLButtonElement>, newVal: number | num
       <MainContent updateSong={updateSong}/> 
       }
 
-<div id="loading_flag">
-        </div>
     </div>
   )
 }
