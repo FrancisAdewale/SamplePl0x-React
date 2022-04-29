@@ -17,7 +17,7 @@ const App: React.FC = () => {
   const [song, setSong] = useState<string | ArrayBuffer | null | undefined>(null);
   const [songUploaded, setSongUploaded] = useState<boolean>(false);
   const [duration, setDuration] = useState<number>(0); 
-  const [zoom, setZoom] = useState<number>(1); 
+  const [zoom, setZoom] = useState<number>(0); 
 
 
   const updateSong = (newSong: string | ArrayBuffer | null | undefined):void => {
@@ -70,6 +70,18 @@ useEffect(() => {
 
 }, [wavesurferObj]);
 
+const updateZoom = (e: React.MouseEvent<HTMLButtonElement>, newVal: number | number[]) => {
+
+
+  console.log(newVal as number);
+
+  // setZoom(value)
+
+  
+
+
+}
+
   return (
     <div className='app-container'>
       <Header />
@@ -78,7 +90,7 @@ useEffect(() => {
       uploadSong
       ?
       
-        <AudioSample waveformRef={waveformRef}/>
+        <AudioSample waveformRef={waveformRef} handleChange={updateZoom}/>
         
       :
       <MainContent updateSong={updateSong}/> 
