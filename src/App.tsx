@@ -5,9 +5,10 @@ import Header from './components/Header';
 import MainContent from './components/MainContent';
 import AudioSample from './components/AudioSample';
 import WaveSurfer from "wavesurfer.js";
+import WebAudio from 'wavesurfer.js/src/webaudio.js'
 import TimelinePlugin from 'wavesurfer.js/dist/plugin/wavesurfer.timeline.min.js';
 import RegionsPlugin from 'wavesurfer.js/dist/plugin/wavesurfer.regions.min.js';
-import { on } from 'stream';
+
 
 const App: React.FC = () => {
 
@@ -34,6 +35,8 @@ useEffect(() => {
       waveColor: '#14213D',
       progressColor: '#FCA311',
       responsive: true,
+      loopSelection: true,
+      backend: "WebAudio",
       plugins : [
       RegionsPlugin.create({
         dragSelection: {
@@ -56,11 +59,9 @@ useEffect(() => {
   wavesurferObj?.regions.enableDragSelection({});
   wavesurferObj?.on('ready', () => { 
     setDuration(Math.floor(wavesurferObj?.getDuration()));
+    
     console.log(wavesurferObj?.getDuration());
   });
-
-
-  wavesurferObj?.getDuration();
 
   wavesurferObj?.on('region-dblclick', region => {
    region.remove();
@@ -115,19 +116,100 @@ const sampleAudio = (e: React.MouseEventHandler<HTMLButtonElement>) => {
       if (region) {
           const start = region.start;
           const end = region.end;
+          
+          const audioContext = wavesurferObj.backend.getAudioContext();
+          const source = audioContext.createBufferSource()
+
+          var request = new XMLHttpRequest();
+          request.open('GET', song as string, true);
+          request.responseType = 'arraybuffer';
+
+          request.onload = function() {
+            var audioData = request.response;
+        
+            audioContext.decodeAudioData(audioData, function(buffer) {
+                source.buffer = buffer;
+
+                 const new_buffer = audioContext.createBuffer(
+                 source.buffer.numberOfChannels,
+                 source.buffer.length,
+                 source.buffer.sampleRate
+          );
+
+          const first_list_index = start * source.buffer.sampleRate;
+          const second_list_index = end * source.buffer.sampleRate;
+          const second_list_mem_alloc =
+            source.buffer.length - end * source.buffer.sampleRate;
+
+          // create a new array upto the region to be trimmed
+          const new_list = new Float32Array(first_list_index);
+
+          // create a new array of region after the trimmed region
+          const second_list = new Float32Array(
+              second_list_mem_alloc
+          );
+
+          // create an array to combine the 2 parts
+          const combined = new Float32Array(source.buffer.length);
+
+          // 2 channels: 1-right, 0-left
+          // copy the buffer values for the 2 regions from the original buffer
+
+          // for the region to the left of the trimmed section
+          source.buffer.copyFromChannel(new_list, 0);
+          source.buffer.copyFromChannel(new_list, 1);
+
+          // for the region to the right of the trimmed section
+          source.buffer.copyFromChannel(
+              second_list,
+              1,
+              second_list_index
+          );
+          source.buffer.copyFromChannel(
+              second_list,
+              0,
+              second_list_index
+          );
+
+          combined.set(new_list);
+          combined.set(second_list, first_list_index);
+
+          // copy the combined array to the new_buffer
+          new_buffer.copyToChannel(combined, 1);
+          new_buffer.copyToChannel(combined, 0);
+
+          wavesurferObj.loadDecodedBuffer(new_buffer);
+          
+          const blob = new Blob([new_buffer], {type: "audio/wav"});
+          const href = URL.createObjectURL(blob)
+          
+          const a = Object.assign(document.createElement("a"), {href, style: "display:none",  download:"Demo.mp3"});
+          
+          document.body.appendChild(a)
+          
+          a.click()
+          URL.revokeObjectURL(href)
+          a.remove();
+
+
+
+
+    
+              },
+        
+              function(e){ console.log("Error with decoding audio data" + e); });
+        
+          }
+
+
+
 
           // obtain the original array of the audio
-          // const original_buffer = wavesurferObj.backend.buffer;
+          // create a temporary new buffer array with the same length, sample rate and no of channels as the original audio
+         
 
-          // // create a temporary new buffer array with the same length, sample rate and no of channels as the original audio
-          // const new_buffer = wavesurferObj.backend.ac.createBuffer(
-          //     original_buffer.numberOfChannels,
-          //     original_buffer.length,
-          //     original_buffer.sampleRate
-          // );
-
-          // // create 2 indices:
-          // // left & right to the part to be trimmed
+          // create 2 indices:
+          // left & right to the part to be trimmed
           // const first_list_index = start * original_buffer.sampleRate;
           // const second_list_index = end * original_buffer.sampleRate;
           // const second_list_mem_alloc =
@@ -163,7 +245,7 @@ const sampleAudio = (e: React.MouseEventHandler<HTMLButtonElement>) => {
           //     second_list_index
           // );
 
-          // // create the combined buffer for the trimmed audio
+          // create the combined buffer for the trimmed audio
           // combined.set(new_list);
           // combined.set(second_list, first_list_index);
 
@@ -171,7 +253,7 @@ const sampleAudio = (e: React.MouseEventHandler<HTMLButtonElement>) => {
           // new_buffer.copyToChannel(combined, 1);
           // new_buffer.copyToChannel(combined, 0);
 
-          // // load the new_buffer, to restart the wavesurfer's waveform display
+          // load the new_buffer, to restart the wavesurfer's waveform display
 
           // wavesurferObj.loadDecodedBuffer(new_buffer);
           

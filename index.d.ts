@@ -4,6 +4,7 @@ declare module '@mui/material/Slider';
 declare module '@mui/icons-material/Add';
 declare module '@mui/icons-material/Remove';
 declare module '@mui/material/Button';
+declare module 'wavesurfer.js/src/webaudio.js'
 
 
 
