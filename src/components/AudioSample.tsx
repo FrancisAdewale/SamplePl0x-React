@@ -10,10 +10,11 @@ import Slider from '@mui/material/Slider';
 interface IProps {
     waveformRef : MutableRefObject<null>
     handleChange : (e: React.MouseEvent<HTMLButtonElement>, newVal: number | number[]) => void
+    handleSampling: (e: React.MouseEventHandler<HTMLButtonElement>) => void
 }
 
 
-const AudioSample : React.FC<IProps> = ({waveformRef, handleChange}) => {
+const AudioSample : React.FC<IProps> = ({waveformRef, handleChange, handleSampling}) => {
 
 
     return (
@@ -42,9 +43,9 @@ const AudioSample : React.FC<IProps> = ({waveformRef, handleChange}) => {
                    
                 />
 
-
-
               }
+
+              {waveformRef.current && <Button onClick={handleSampling}>Sample Audio</Button>}
                
 
 
